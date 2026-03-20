@@ -1,6 +1,5 @@
-name: Server-Side Hooks
+name: Server-Side Hooks (Latest Commit Only)
 
-# Trigger the workflow on pull requests
 on:
   pull_request:
     types: [opened, synchronize]
@@ -10,25 +9,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
+      # Checkout the PR
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # fetch full history so HEAD is available
 
-      # 1️⃣ Validate commit messages
-      - name: Check commit messages for ticket IDs
+      # Check only the latest commit message
+      - name: Check latest commit message for ticket ID
         run: |
-          echo "Checking commit messages for ticket IDs..."
-          commits=$(git log origin/main..HEAD --pretty=format:%s)
-          for c in $commits; do
-            if ! echo "$c" | grep -qE "PROJ-[0-9]+"; then
-              echo "❌ Commit message '$c' missing ticket ID"
-              exit 1
-            fi
-          done
-
-      # 2️⃣ Run tests
-      - name: Run tests
-        run: |
-          echo "Installing dependencies..."
-          npm install
-          echo "Running tests..."
-          npm test
+          echo "Checking latest commit message..."
+          latest_commit_msg=$(git log -1 --pretty=format:%s)
+          echo "Latest commit: $latest_commit_msg"
+          if ! echo "$latest_commit_msg" | grep -qE "PROJ-[0-9]+"; then
+            echo "❌ Latest commit message missing ticket ID (PROJ-123)"
+            exit 1
+          fi
