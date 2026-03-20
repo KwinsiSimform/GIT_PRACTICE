@@ -18,7 +18,7 @@ jobs:
       - name: Check latest commit message for ticket ID
         run: |
           echo "Checking latest commit message..."
-          latest_commit_msg=$(git log -1 --pretty=format:%s)
+          latest_commit_msg=$(git log -1 --no-merges --pretty=format:%s)
           echo "Latest commit: $latest_commit_msg"
           if ! echo "$latest_commit_msg" | grep -qE "PROJ-[0-9]+"; then
             echo "❌ Latest commit message missing ticket ID (PROJ-123)"
