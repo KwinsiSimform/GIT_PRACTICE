@@ -1,0 +1,26 @@
+name: Server-Side Hooks (Latest Commit Only)
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the PR
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # fetch full history so HEAD is available
+
+      # Check only the latest commit message
+      - name: Check latest commit message for ticket ID
+        run: |
+          echo "Checking latest commit message..."
+          latest_commit_msg=$(git log -1 --no-merges --pretty=format:%s)
+          echo "Latest commit: $latest_commit_msg"
+          if ! echo "$latest_commit_msg" | grep -qE "PROJ-[0-9]+"; then
+            echo "❌ Latest commit message missing ticket ID (PROJ-123)"
+            exit 1
+          fi
