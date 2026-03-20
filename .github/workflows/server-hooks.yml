@@ -1,0 +1,34 @@
+name: Server-Side Hooks
+
+# Trigger the workflow on pull requests
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v3
+
+      # 1️⃣ Validate commit messages
+      - name: Check commit messages for ticket IDs
+        run: |
+          echo "Checking commit messages for ticket IDs..."
+          commits=$(git log origin/main..HEAD --pretty=format:%s)
+          for c in $commits; do
+            if ! echo "$c" | grep -qE "PROJ-[0-9]+"; then
+              echo "❌ Commit message '$c' missing ticket ID"
+              exit 1
+            fi
+          done
+
+      # 2️⃣ Run tests
+      - name: Run tests
+        run: |
+          echo "Installing dependencies..."
+          npm install
+          echo "Running tests..."
+          npm test
